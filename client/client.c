@@ -14,8 +14,10 @@ int main(int argc, char* argv[]){
 
     char filename[100];
 
-    printf("Enter filename to send => ");
+    printf("Enter name of file to send => ");
     fgets(filename, 100, stdin);
+
+    filename[strlen(filename) - 1] = '\0';
 
     struct sockaddr_in serverAddr;
 
@@ -39,9 +41,7 @@ int main(int argc, char* argv[]){
 
     printf("Connection accepted from localhost\n");
 
-    printf("Sending this code compiled SENDMSG\n");
-
-    FILE *fp = fopen("test.txt", "r");
+    FILE *fp = fopen(filename, "r");
     if( fp == NULL )  {
         perror ("Error opening file");
         exit(1);
@@ -50,8 +50,6 @@ int main(int argc, char* argv[]){
     fseek(fp, 0, SEEK_END);
 
     int size = ftell(fp);
-
-    printf("Size: %d\n", size);
 
     fclose(fp);
 
@@ -68,7 +66,8 @@ int main(int argc, char* argv[]){
 
     }
 
-    printf("Waiting for RECVMSG\n");
+    printf("Sent file name: %s\n", filename);
+    printf("Sent file length = %d\n", size);
 
     struct resp_msg respmsg;
     int rval;
@@ -83,13 +82,9 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    printf("RECV: %d, %d, %d\n", respmsg.msg_type, respmsg.status, respmsg.file_size);
-
     int totalSize = 0;
 
     int fd = open("test.txt", O_RDONLY);
-
-    printf("Sent file length: %d\n", sendmsg.file_size);
 
     while(totalSize < sendmsg.file_size)
     {
@@ -97,8 +92,6 @@ int main(int argc, char* argv[]){
 
         datamsg.msg_type = CMD_SEND;
         datamsg.data_length = read(fd, &datamsg.buffer, MAX_DATA_SIZE);
-
-        printf("Sending %d bytes from file\n", datamsg.data_length);
 
         if(send(sock, &datamsg, sizeof(datamsg), 0) < 0){
 
@@ -108,8 +101,12 @@ int main(int argc, char* argv[]){
 
         }
 
+        printf("Sent %d bytes from file\n", datamsg.data_length);
+
         totalSize += datamsg.data_length;
     }
+
+    printf("Wrote %d bytes to remote server\n", totalSize);
 
     close(fd);
 

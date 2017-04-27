@@ -29,8 +29,6 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    printf("Server: waiting for connection\n");
-
     listen(sock, 5);
 
     struct sockaddr_in addr;
@@ -45,7 +43,7 @@ int main(int argc, char* argv[]){
 
     }
 
-    printf("Waiting for SENDMSG\n");
+    printf("Connection accepted from /%s", address);
 
     struct send_msg sendmsg;
 
@@ -61,12 +59,9 @@ int main(int argc, char* argv[]){
         exit(1);
     }
     
-    printf("Server: Received SENDMSG from %s, port %d: \n%s\n", 
-        inet_ntoa(addr.sin_addr),
-        serverAddr.sin_port,
-        sendmsg.filename);
+    printf("Receive file: %s\n", sendmsg.filename);
+    printf("Receive file length: %d\n", sendmsg.file_size);
 
-    printf("Sending RESPMSG\n");
     struct resp_msg respmsg;
     respmsg.msg_type = CMD_SEND;
     respmsg.status = 0;
@@ -87,8 +82,6 @@ int main(int argc, char* argv[]){
     while(totalSize < sendmsg.file_size)
     {
 
-        printf("Recieveing...\n");
-
         struct data_msg datamsg;
         int rval;
         if( (rval = recv(mysock, &datamsg, sizeof(datamsg), 0)) < 0 ){
@@ -106,8 +99,12 @@ int main(int argc, char* argv[]){
 
         write(fd, &datamsg.buffer, datamsg.data_length);
 
+        printf("Read %d bytes\n", datamsg.data_length);
+
         totalSize += datamsg.data_length;
     }
+
+    printf("Wrote %d bytes to output file\n", totalSize);
 
     close(fd);
     close(mysock);
