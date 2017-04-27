@@ -8,9 +8,10 @@
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 #define MAX_DATA_SIZE 1024
-#define CMS_SEND 0
+#define CMD_SEND 0
 #define CMD_RECV 1
 #define CMD_RESP 2
 #define CMD_DATA 3
