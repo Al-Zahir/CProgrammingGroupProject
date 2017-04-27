@@ -35,7 +35,7 @@ struct resp_msg{
 struct data_msg{
 
     int msg_type;
-    int data_leng;
+    int data_length;
     char buffer[MAX_DATA_SIZE];
 
 };

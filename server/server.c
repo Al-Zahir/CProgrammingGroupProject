@@ -1,4 +1,4 @@
-#include "proj.h"
+#include "../proj.h"
 
 int main(int argc, char* argv[]){
 
@@ -66,6 +66,7 @@ int main(int argc, char* argv[]){
         serverAddr.sin_port,
         sendmsg.filename);
 
+    printf("Sending RESPMSG\n");
     struct resp_msg respmsg;
     respmsg.msg_type = CMD_SEND;
     respmsg.status = 0;
@@ -79,6 +80,36 @@ int main(int argc, char* argv[]){
 
     }
 
+    int fd = open(sendmsg.filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
+
+    int totalSize = 0;
+
+    while(totalSize < sendmsg.file_size)
+    {
+
+        printf("Recieveing...\n");
+
+        struct data_msg datamsg;
+        int rval;
+        if( (rval = recv(mysock, &datamsg, sizeof(datamsg), 0)) < 0 ){
+            perror("reading stream message error");
+            close(fd);
+            close(mysock);
+            exit(1);
+        }
+        else if(rval == 0){
+            printf("Ending connection.\n");
+            close(fd);
+            close(mysock);
+            exit(1);
+        }
+
+        write(fd, &datamsg.buffer, datamsg.data_length);
+
+        totalSize += datamsg.data_length;
+    }
+
+    close(fd);
     close(mysock);
 
 }
