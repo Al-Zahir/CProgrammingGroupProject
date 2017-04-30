@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+extern int errno;
+
 #define MAX_DATA_SIZE 1024
 #define CMD_SEND 0
 #define CMD_RECV 1
