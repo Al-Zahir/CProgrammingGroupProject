@@ -1,0 +1,6 @@
+cc -c ../sendrecv.c -o ../sendrecv.o
+cc server.c ../sendrecv.o -o server
+cc client.c ../sendrecv.o -o client
+
+TODO:
+File name should be trimmed when sending to server

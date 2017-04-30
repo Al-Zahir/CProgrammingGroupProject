@@ -1,4 +1,5 @@
 #include "../proj.h"
+#include "../sendrecv.h"
 
 int main(int argc, char* argv[]){
 
@@ -64,62 +65,16 @@ int main(int argc, char* argv[]){
 
         printf("Connection accepted from localhost\n");
 
-        struct send_msg sendmsg;
-        sendmsg.msg_type = CMD_SEND;
-        sendmsg.file_size = size;
-        sprintf(sendmsg.filename, filename);
-
-        if(send(sock, &sendmsg, sizeof(sendmsg), 0) < 0){
-
-            perror("send failed");
-            close(sock);
-            exit(1);
-
-        }
+        send_msg(CMD_SEND, CMD_SEND, sock, size, filename, 0);
 
         printf("Sent file name: %s\n", filename);
         printf("Sent file length = %d\n", size);
 
         struct resp_msg respmsg;
-        int rval;
-        if( (rval = recv(sock, &respmsg, sizeof(respmsg), 0)) < 0 ){
-            perror("reading stream message error");
-            close(sock);
-            exit(1);
-        }
-        else if(rval == 0){
-            printf("Ending connection.\n");
-            close(sock);
-            exit(1);
-        }
+        recieve_msg(&respmsg, sizeof(respmsg), sock);
 
-        int totalSize = 0;
-
-        int fd = open(filename, O_RDONLY);
-
-        while(totalSize < sendmsg.file_size)
-        {
-            struct data_msg datamsg;
-
-            datamsg.msg_type = CMD_SEND;
-            datamsg.data_length = read(fd, &datamsg.buffer, MAX_DATA_SIZE);
-
-            if(send(sock, &datamsg, sizeof(datamsg), 0) < 0){
-
-                perror("send failed");
-                close(sock);
-                exit(1);
-
-            }
-
-            printf("Sent %d bytes from file\n", datamsg.data_length);
-
-            totalSize += datamsg.data_length;
-        }
-
-        printf("Wrote %d bytes to remote server\n", totalSize);
-
-        close(fd);
+        send_data(sock, filename, size);
+        printf("Wrote %d bytes to remote server\n", size);
 
         close(sock);
 
@@ -154,33 +109,12 @@ int main(int argc, char* argv[]){
 
         printf("Connection accepted from localhost\n");
 
-        struct send_msg sendmsg;
-        sendmsg.msg_type = CMD_RECV;
-        sendmsg.file_size = 0;
-        sprintf(sendmsg.filename, filename);
-
-        if(send(sock, &sendmsg, sizeof(sendmsg), 0) < 0){
-
-            perror("send failed");
-            close(sock);
-            exit(1);
-
-        }
+        send_msg(CMD_SEND, CMD_RECV, sock, 0, filename, 0);
 
         printf("Sent file name: %s\n", filename);
 
         struct resp_msg respmsg;
-        int rval;
-        if( (rval = recv(sock, &respmsg, sizeof(respmsg), 0)) < 0 ){
-            perror("reading stream message error");
-            close(sock);
-            exit(1);
-        }
-        else if(rval == 0){
-            printf("Ending connection.\n");
-            close(sock);
-            exit(1);
-        }
+        recieve_msg(&respmsg, sizeof(respmsg), sock);
 
         if(respmsg.status != 0){
 
@@ -193,38 +127,8 @@ int main(int argc, char* argv[]){
 
         printf("Received file size: %d\n", respmsg.file_size);
 
-        int fd = open(sendmsg.filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
+        recv_data(sock, filename, respmsg.file_size);
 
-        int totalSize = 0;
-
-        while(totalSize < respmsg.file_size)
-        {
-
-            struct data_msg datamsg;
-            int rval;
-            if( (rval = recv(sock, &datamsg, sizeof(datamsg), 0)) < 0 ){
-                perror("reading stream message error");
-                close(fd);
-                close(sock);
-                exit(1);
-            }
-            else if(rval == 0){
-                printf("Ending connection.\n");
-                close(fd);
-                close(sock);
-                exit(1);
-            }
-
-            write(fd, &datamsg.buffer, datamsg.data_length);
-
-            printf("Read %d bytes\n", datamsg.data_length);
-
-            totalSize += datamsg.data_length;
-        }
-
-        printf("Wrote %d bytes to output file\n", totalSize);
-
-        close(fd);
         close(sock);
 
     }
