@@ -1,0 +1,20 @@
+.TH client 1 "4 May 2017" "version 1.0"
+.SH NAME
+client - creates a client to send and recieve files
+.SH SYNOPSIS
+client [-cs | -sc]
+.SH DESCRIPTION
+Prompts the user for the remote server IP address, the remote server port, the type of copy to do (client-to-server or server-to-client) and the name of the file to copy; if the copy is from the client to the server: sends the server the copy message type (i.e., send), and the name and size of the file of the file to be sent; if the copy is from the server to the client sends the copy message type (i.e., receive) and the name of the file, awaits the servers response, if the response has status = OK, enters a loop that either writes blocks to the remote server from the file, or writes from the remote server to the file, and when done closes the file and socket before exiting.
+.SH OPTION
+.TP
+.B -cs
+sends a file from the client to the server. file must exist on the client
+.TP
+.B -sc
+sends a file from the server to the client. file must exist on the server
+.SH BUGS
+Report client bugs to axr355@psu.edu
+.SH AUTHOR
+Written by Al-Zahir Rahemtulla, Hira Mian, and Izac Diaz
+.SH SEE ALSO
+cp(1)

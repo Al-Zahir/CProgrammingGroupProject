@@ -1,0 +1,13 @@
+.TH server 1 "4 May 2017" "version 1.0"
+.SH NAME
+server - creates a server that waits for incoming connections
+.SH SYNOPSIS
+server
+.SH DESCRIPTION
+Prompts the user for an address and a port on which to listen, enters an infinite loop that accepts incoming connections, reads the input stream for the type of copy (client-to-server or server-to-client) and sends the proper response to the client. If the copy type is from client to server: enters a loop that reads the network input for the file contents and writes the bytes read to the output file; if the copy type is from server to client: enters a loop that writes the file contents to the network output. When done closes the file and the remote sd.
+.SH BUGS
+Report server bugs to axr355@psu.edu
+.SH AUTHOR
+Written by Al-Zahir Rahemtulla, Hira Mian, and Izac Diaz
+.SH SEE ALSO
+cp(1)

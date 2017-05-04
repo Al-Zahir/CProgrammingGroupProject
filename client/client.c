@@ -5,8 +5,17 @@ int main(int argc, char* argv[]){
     if(argc != 2){
 
         perror("Please enter exactly 2 arguments. \
-            \nExample ./client cs for client to server. \
-            \nExample ./client sc for server to client.");
+            \nExample ./client -cs for client to server. \
+            \nExample ./client -sc for server to client.");
+        exit(1);
+
+    }
+
+    if(strcmp(argv[1], "-cs") != 0 && strcmp(argv[1], "-sc") != 0){
+
+        perror("Please enter exactly 2 arguments. \
+            \nExample ./client -cs for client to server. \
+            \nExample ./client -sc for server to client.");
         exit(1);
 
     }
@@ -21,7 +30,7 @@ int main(int argc, char* argv[]){
     printf("Enter port of destination => ");
     fgets(port, 100, stdin);
 
-    if(strcmp(argv[1], "cs") == 0){
+    if(strcmp(argv[1], "-cs") == 0){
 
         char filename[100];
 
