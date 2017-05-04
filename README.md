@@ -2,17 +2,19 @@
 
 INSTRUCTIONS:
 
-Open 2 terminals. 
-Navigate them both to the CProgrammingGroupProject folder.
-type "man ./server.1" to access server man page.
-type "man ./client.1" to access client man page.
-Change 1 terminal's dir to the server folder
-Change the other one to the client folder
-type "cc -c ../sendrecv.c -o ../sendrecv.o" in either terminal to compile the functions
-type "cc server.c ../sendrecv.o -o server" in the server terminal to compile the server
-type "cc client.c ../sendrecv.o -o client" in the client terminal to compile the client
+Open 2 terminals.  
+Navigate them both to the CProgrammingGroupProject folder.  
+type "man ./server.1" to access server man page.  
+type "man ./client.1" to access client man page.  
+Change 1 terminal's dir to the server folder  
+Change the other one to the client folder  
+type "cc -c ../sendrecv.c -o ../sendrecv.o" in either terminal to compile the functions  
+type "cc server.c ../sendrecv.o -o server" in the server terminal to compile the server  
+type "cc client.c ../sendrecv.o -o client" in the client terminal to compile the client  
 
-Read the man page to execute the server and the client.
+Read the man page to execute the server and the client.  
+
+
 
 
 Group Project: Networking with TCP. Create a client application and a server application to copy a file on the client computer to a file on the server computer and vice versa. This exercise mimics the UNIX/Linux rcp – remote copy – command that allows users to copy files from and to remote servers. Your programs will also bypass all the security constraints built into the rcp command. You WILL be strictly graded on HOW WELL YOU FOLLOW DIRECTIONS! Do not take any shortcuts. This project does NOT utilize threading.
