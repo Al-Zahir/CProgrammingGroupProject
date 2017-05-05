@@ -1,0 +1,204 @@
+#include "../proj.h"
+
+SERVER:
+
+    log "Enter address to bind: "  
+    fgets address, 100, stdin  
+
+    log "Enter port to listen => "  
+    fgets port, 100, stdin  
+
+    serverAddr.sin_family = AF_INET 
+    serverAddr.sin_addr.s_addr = inet_addr address  
+    serverAddr.sin_port = htons atoi port   
+
+    int sock = socket AF_INET, SOCK_STREAM, 0  
+    if sock < 0  
+        error "Socket create error"  
+        exit 1  
+     
+
+    if bind sock, &serverAddr, sizeof serverAddr   != 0  
+        error "Bind error"  
+        exit 1  
+     
+
+    listen sock, 5  
+
+    struct sockaddr_in addr 
+     fromlen = sizeof addr  
+    int mysock = accept sock,   &addr, &fromlen  
+
+    if mysock == -1  
+
+        error "accept failed"  
+        close mysock  
+        exit 1  
+
+    log "Connection accepted from /%s", address  
+ 
+    recieve_msg &sendmsg, sizeof sendmsg , mysock  
+    
+    if sendmsg.msg_type == CMD_SEND 
+     
+        log "Receive : %s\n", sendmsg.name  
+        log "Receive  length: %d\n", sendmsg._size  
+
+        send_msg CMD_RESP, CMD_SEND, mysock, sendmsg._size, NULL, 0  
+
+        recv_data mysock, sendmsg.name, sendmsg._size  
+        
+        close mysock  
+      else  
+        int Exists = 1 
+
+         *fp = fopen sendmsg.name, "r"  
+        if  fp == NULL     
+            error  "Error opening "  
+            Exists = 0 
+         
+
+        int size = 0 
+        if Exists  
+
+            fseek fp, 0, SEEK_END  
+            size = ftell fp  
+            fclose fp  
+            log "Sending : %s\n", sendmsg.name  
+            log "Sending  length: %d\n", size  
+
+         
+
+        send_msg CMD_RESP, CMD_RECV, mysock, size, NULL, errno  
+
+        if !Exists  
+            close mysock  
+            exit 1  
+         
+
+        send_data mysock, sendmsg.name, size  
+        log "Wrote %d bytes to remote client\n", size  
+
+        close mysock  
+     
+
+
+CLIENT:
+
+    if argc != 2  
+
+    error "Please enter exactly 2 arguments. \
+        \nExample ./client -cs for client to server. \
+        \nExample ./client -sc for server to client."  
+    exit 1  
+
+
+
+    if strcmp argv[1], "-cs"  != 0 && strcmp argv[1], "-sc"  != 0  
+
+    error "Please enter exactly 2 arguments. \
+        \nExample ./client -cs for client to server. \
+        \nExample ./client -sc for server to client."  
+    exit 1  
+
+    log "Enter IP address of destination => "  
+    fgets address, 100, stdin 
+
+    log "Enter port of destination => "  
+    fgets port, 100, stdin  
+
+    if strcmp argv[1], "-cs"  == 0  
+
+    log "Enter name of  to send => "  
+    fgets name, 100, stdin  
+
+    name[strlen name  - 1] = '\0' 
+
+    *fp = fopen name, "r"  
+    if  fp == NULL     
+        error  "Error opening "  
+        exit 1  
+     
+
+    fseek fp, 0, SEEK_END  
+
+    int size = ftell fp  
+
+    fclose fp  
+
+    serverAddr.sin_family = AF_INET 
+    serverAddr.sin_addr.s_addr = inet_addr address  
+    serverAddr.sin_port = htons atoi port   
+
+    int sock = socket AF_INET, SOCK_STREAM, 0  
+    if sock < 0  
+        error "Socket create error"  
+        exit 1  
+     
+
+    if connect sock, &serverAddr, sizeof serverAddr   < 0   
+
+        error "connect failed"  
+        close sock  
+        exit 1  
+
+    log "Connection accepted from localhost\n"  
+
+    send_msg CMD_SEND, CMD_SEND, sock, size, name, 0  
+
+    log "Sent  name: %s\n", name  
+    log "Sent  length = %d\n", size  
+
+    recieve_msg &respmsg, sizeof respmsg , sock  
+
+    send_data sock, name, size  
+    log "Wrote %d bytes to remote server\n", size  
+
+    close sock  
+
+    else 
+
+    log "Enter name of  to receive => "  
+    fgets name, 100, stdin  
+
+    name[strlen name  - 1] = '\0' 
+
+    serverAddr.sin_family = AF_INET 
+    serverAddr.sin_addr.s_addr = inet_addr address  
+    serverAddr.sin_port = htons atoi port   
+
+    int sock = socket AF_INET, SOCK_STREAM, 0  
+    if sock < 0  
+        error "Socket create error"  
+        exit 1  
+     
+
+    if connect sock, &serverAddr, sizeof serverAddr   < 0   
+
+        error "connect failed"  
+        close sock  
+        exit 1  
+
+
+    log "Connection accepted from localhost\n"  
+
+    send_msg CMD_SEND, CMD_RECV, sock, 0, name, 0  
+
+    log "Sent  name: %s\n", name  
+
+    recieve_msg &respmsg, sizeof respmsg , sock  
+
+    if respmsg.status != 0  
+
+        errno = respmsg.status 
+        error "Error opening  on server"  
+        close sock  
+        exit 1  
+
+
+    log "Received  size: %d\n", respmsg._size  
+
+    recv_data sock, name, respmsg._size  
+
+    close sock  
+    
