@@ -14,6 +14,9 @@ type "cc client.c ../sendrecv.o -o client" in the client terminal to compile the
 
 Read the man page to execute the server and the client.  
 
+2 text files have been included for testing the server and client.  
+test.txt is part of the client, the file can be used to send to the server.  
+meme.txt is part of the server, the file can be used to send to the client.  
 
 
 
